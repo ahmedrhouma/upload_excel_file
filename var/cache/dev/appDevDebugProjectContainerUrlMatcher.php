@@ -114,9 +114,19 @@ class appDevDebugProjectContainerUrlMatcher extends Symfony\Bundle\FrameworkBund
             return $ret;
         }
 
+        // ballot
+        if ('/ballot' === $pathinfo) {
+            return array (  '_controller' => 'AppBundle\\Controller\\test1Controller::test1Action',  '_route' => 'ballot',);
+        }
+
         // upload
         if ('/upload' === $pathinfo) {
             return array (  '_controller' => 'AppBundle\\Controller\\testController::testAction',  '_route' => 'upload',);
+        }
+
+        // candidate
+        if ('/candidate' === $pathinfo) {
+            return array (  '_controller' => 'AppBundle\\Controller\\testController::test2Action',  '_route' => 'candidate',);
         }
 
         throw 0 < count($allow) ? new MethodNotAllowedException(array_unique($allow)) : new ResourceNotFoundException();

@@ -25,13 +25,10 @@ class testController extends Controller
                 if ($fileName[1] == "xls") {
                     echo "Processing !!!";
                     $file = $_FILES["excelFile"]["tmp_name"];
-                    try {
-                        $inputFileType = \PHPExcel_IOFactory::identify($file);
-                        $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-                        $objPHPExcel = $objReader->load($file);
-                    } catch (Exception $e) {
-                        die('Error loading file "' . pathinfo($file, PATHINFO_BASENAME) . '": ' . $e->getMessage());
-                    }
+
+                    $inputFileType = \PHPExcel_IOFactory::identify($file);
+                    $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+                    $objPHPExcel = $objReader->load($file);
 
 //  Get worksheet dimensions
 
@@ -86,63 +83,105 @@ class testController extends Controller
                             $Date = $tab;
                             var_dump($Date, $arrayLabel[$j]);
                         }
-
-
                         try {
                             $bdd = new PDO('mysql:host=localhost;dbname=test;charset=utf8', 'root', '');
                         } catch (Exception $e) {
                             die('Erreur : ' . $e->getMessage());
                         }
 
-                        $req = $bdd->prepare('INSERT INTO event(Language,title, description, company, Date) VALUES (:Language,:title,:description, :company,:Date)');
+                        $req = $bdd->prepare('INSERT INTO event(Language,title,description,company,Date) VALUES (:Language,:title,:description,:company,:Date)');
                         $req->execute(array('Language' => $Language, 'title' => $title, 'description' => $description, 'company' => $company, 'Date' => $Date));
+                        $this->connection = null;
+
                     }
-               $worksheet = $objPHPExcel->getSheetbyName('URNS');
-               $highestRow = $worksheet->getHighestRow();
 
 
+                } else {
+                    echo "you must choose a CVS file to import !!!";
+                }
+
+            } else {
+                echo "you must choose a file !!!";
+            }
+            echo "you cliked the botton !!!";
+        }
+        return $this->render('test.html.twig');
+    }
 
 
+    /**
+     * @Route("/candidate", name="candidate")
+     */
+    public function test2Action()
+    {
+        require_once "../../Classes/PHPExcel.php";
+        require_once '../../Classes/PHPExcel/IOFactory.php';
+        if (isset($_POST["btnInport"])) {
+            if (!empty($_FILES["excelFile"]["tmp_name"])) {
+                $fileName = explode(".", $_FILES["excelFile"]["name"]);
+                if ($fileName[1] == "xls") {
+                    echo "Processing !!!";
+                    $file = $_FILES["excelFile"]["tmp_name"];
 
-                    for ($row = 1; $row <= $highestRow; $row++) {
-                        $j = 0;
-                        $tab = $worksheet->getCell($arrayLabel[$j] . $row)->getValue();
-                        $ID = $tab;
-                        var_dump($ID, $arrayLabel[$j]);
+        $inputFileType = \PHPExcel_IOFactory::identify($file);
+        $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+        $objPHPExcel = $objReader->load($file);
 
+//  Get worksheet dimensions
 
-                        $j = 1;
-                        if ($j < count($arrayLabel)) {
-                            echo "<tr><td>";
-                            $tab = $worksheet->getCell('A' . $row)->getValue();
-                            $Language = $tab;
-                            var_dump($Language);
-                            var_dump($arrayLabel[$j]);
-                        }
+        $arrayLabel = array("A", "B", "C", "D");
 
+        $inputFileType2 = \PHPExcel_IOFactory::identify($file);
+        $objReader2 = \PHPExcel_IOFactory::createReader($inputFileType2);
+        $objPHPExcel2 = $objReader2->load($file);
 
-                        $j = 2;
-                        if ($j < count($arrayLabel)) {
-                            echo "<tr><td>";
-                            $tab = $worksheet->getCell('B' . $row)->getValue();
-                            $label = $tab;
-                            var_dump($label, $arrayLabel[$j]);
-                        }
-
-
-                        $j = 3;
-                        if ($j < count($arrayLabel)) {
-                            echo "<tr><td>";
-                            $tab = $worksheet->getCell('C' . $row)->getValue();
-                            $description = $tab;
-                            var_dump($description, $arrayLabel[$j]);
-                        }
-
+        $worksheet2 = $objPHPExcel2->getSheetbyName('CANDIDATES');
+        $highestRow2 = $worksheet2->getHighestRow();
+        for ($row = 1; $row <= $highestRow2; $row++) {
+            $j = 0;
+            $tab = $worksheet2->getCell('A' . $row)->getValue();
+            $Ballot_id = $tab;
+            var_dump($Ballot_id);
 
 
-                        $req = $bdd->prepare('INSERT INTO ballot(Language,label, description,Event_id) VALUES (:Language,:label, :description,:Event_id)');
-                        $req->execute(array('Language' => $Language, 'label' => $label, 'description' => $description,'Event_id' => $ID));
-                    }
+            $j = 1;
+            if ($j < count($arrayLabel)) {
+                echo "<tr><td>";
+                $tab = $worksheet2->getCell('B' . $row)->getValue();
+                $type = $tab;
+                var_dump($type);
+
+            }
+
+
+            $j = 2;
+            if ($j < count($arrayLabel)) {
+                echo "<tr><td>";
+                $tab = $worksheet2->getCell('C' . $row)->getValue();
+                $NL = $tab;
+                var_dump($NL);
+            }
+
+
+            $j = 3;
+            if ($j < count($arrayLabel)) {
+                echo "<tr><td>";
+                $tab = $worksheet2->getCell('D' . $row)->getValue();
+                $FR = $tab;
+                var_dump($FR);
+            }
+            try {
+                $bdd = new PDO('mysql:host=localhost;dbname=test;charset=utf8', 'root', '');
+            } catch (Exception $e) {
+                die('Erreur : ' . $e->getMessage());
+            }
+
+
+            $req1 = $bdd->prepare('INSERT INTO Candidate(language ,type, list,Ballot_id) VALUES (:FR,:type,:NL,:Ballot_id)');
+            $req1->execute(array('FR'=>$FR,'type'=>$type,'NL'=>$NL,'Ballot_id'=>$Ballot_id));
+
+        }
+
                 } else {
                     echo "you must choose a CVS file to import !!!";
                 }
