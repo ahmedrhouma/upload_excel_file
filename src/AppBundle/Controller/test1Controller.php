@@ -73,7 +73,9 @@ class test1Controller extends Controller
                         }
                         $req1 = $bdd->prepare('INSERT INTO ballot(Language,Label,Description,Event_id) VALUES (:Language,:Label,:Description,:Event_id)');
                         $req1->execute(array('Language' => $Language, 'Label' => $Label, 'Description' => $Description, 'Event_id' => $Event_id));
+                        $req = null;
                     }
+
                 } else {
                     echo "you must choose a CVS file to import !!!";
                 }
